@@ -1,0 +1,47 @@
+{
+  "name": "slackenv",
+  "short_name": "Slack Environments",
+  "version": "1.0.0",
+  "manifest_version": 2,
+  "description": "List all your slack environments",
+  "icons": {
+    "16": "icons/icon-16.png",
+    "64": "icons/icon-64.png",
+    "128": "icons/icon-128.png"
+  },
+  "default_locale": "en",
+  "background": {
+    "scripts": [
+      "scripts/background.js"
+    ]
+  },
+  "permissions": [
+    "storage",
+    "https://slack.com/your-workspaces"
+  ],
+  "options_ui": {
+    "page": "options.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://slack.com/your-workspaces"
+      ],
+      "js": [
+        "scripts/contentscript.js"
+      ],
+      "run_at": "document_end",
+      "all_frames": false
+    }
+  ],
+  "browser_action": {
+    "default_icon": {
+      "19": "icons/icon-19.png",
+      "38": "icons/icon-38.png"
+    },
+    "default_title": "My Slack Environments",
+    "default_popup": "popup.html"
+  }
+}
+
+
