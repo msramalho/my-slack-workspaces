@@ -1,11 +1,13 @@
 import ext from "./utils/ext";
 import storage from "./utils/storage";
 
-var popup = document.getElementById("app");
-storage.get('color', function(resp) {
-    var color = resp.color;
-    if (color) {
-        popup.style.backgroundColor = color
+let instructionsItem = document.querySelector("#update-link")
+
+// var popup = document.getElementById("app");
+storage.get('workspaces', function(resp) {
+    let workspaces = resp.workspaces;
+    if (!workspaces) {
+        renderMessage("No workspaces found.");
     }
 });
 
@@ -26,14 +28,15 @@ var renderMessage = (message) => {
     var displayContainer = document.getElementById("display-container");
     displayContainer.innerHTML = `<p class='message'>${message}</p>`;
 }
-
+var tab;
 var renderBookmark = (data) => {
     var displayContainer = document.getElementById("display-container")
     if (data) {
         var tmpl = template(data);
         displayContainer.innerHTML = tmpl;
     } else {
-        renderMessage("Sorry, could not extract this page's title and URL")
+        console.log(tab);
+        renderMessage(JSON.stringify(tab.url))
     }
 }
 
@@ -41,33 +44,22 @@ ext.tabs.query({
     active: true,
     currentWindow: true
 }, function(tabs) {
-    var activeTab = tabs[0];
-    chrome.tabs.sendMessage(activeTab.id, {
-        action: 'process-page'
-    }, renderBookmark);
-});
-
-popup.addEventListener("click", function(e) {
-    if (e.target && e.target.matches("#save-btn")) {
-        e.preventDefault();
-        var data = e.target.getAttribute("data-bookmark");
-        ext.runtime.sendMessage({
-            action: "perform-save",
-            data: data
-        }, function(response) {
-            if (response && response.action === "saved") {
-                renderMessage("Your bookmark was saved successfully!");
-            } else {
-                renderMessage("Sorry, there was an error while saving your bookmark.");
-            }
-        })
+    instructionsItem.style.display = "none";
+    let filtered = tabs.filter(t => t.url.includes("https://slack.com/your-workspaces"))
+    if (filtered.length){
+        instructionsItem.style.display = "list-item";
+        let tab = filtered[0];
+        chrome.tabs.sendMessage(tab.id, {
+            action: 'process-page'
+        }, renderBookmark);
     }
 });
 
-// options link
-document.querySelector(".js-options").addEventListener("click", function(e) {
+
+let workspaceLink = document.querySelector(".slack-workspaces");
+workspaceLink.addEventListener("click", function(e) {
     e.preventDefault();
     ext.tabs.create({
-        'url': ext.extension.getURL('options.html')
+        'url': "https://slack.com/your-workspaces"
     });
 })

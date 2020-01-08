@@ -1,24 +1,33 @@
 <!doctype html>
 <html>
-  <head>
+
+<head>
     <meta charset="utf-8">
     <link href="styles/popup.css" rel="stylesheet">
-  </head>
-  <body>
+</head>
+
+<body>
     <div id="app" class="popup-content">
-      <h1 class="app-name">Your environments</h1>
+        <h1 class="app-name">slackenv</h1>
+        <hr>
 
-      <div id="display-container"></div>
+        <div id="display-container"></div>
 
-      <footer>
-        <p>
-          <small>
-            <a href="#!" class="js-options">Options</a>
-          </small>
-        </p>
-      </footer>
+        <footer>
+            <hr>
+            <small>
+                To update:
+                <ul>
+                    <li>go to <a class="slack-workspaces" href="#!">your workspaces</a></li>
+                    <li>verify your identity</li>
+                    <li>expand to see all workspaces</li>
+                    <li id="update-link" style="display: :none;">finally, click <a class="update-workspaces" href="#!">update</a></li>
+                </ul>
+            </small>
+        </footer>
     </div>
-    
+
     <script src="scripts/popup.js"></script>
-  </body>
+</body>
+
 </html>

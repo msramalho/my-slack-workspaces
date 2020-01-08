@@ -14,13 +14,13 @@ body, html {
 
 footer {
   color: $text-secondary;
-  text-align: right;
+  text-align: left;
   font-size: 0.8em;
   a {
-    outline: none;
-    color: lighten($text-secondary, 10%);
+    color: lighten($brand-primary, 5%);
+    font-weight: 600;
     &:hover {
-      color: $text-secondary;
+      color: $brand-primary;
     }
   }
 }
