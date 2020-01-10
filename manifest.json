@@ -1,9 +1,9 @@
 {
-  "name": "slackenv",
-  "short_name": "Slack Environments",
+  "name": "my-slack-workspaces",
+  "short_name": "My Slack Workspaces",
   "version": "1.0.0",
   "manifest_version": 2,
-  "description": "List all your slack environments",
+  "description": "A simple browser extension to easily access multiple slack workspaces.",
   "icons": {
     "16": "icons/icon-16.png",
     "64": "icons/icon-64.png",
