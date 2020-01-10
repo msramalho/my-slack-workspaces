@@ -29,7 +29,7 @@ var manifest = {
   firefox: {
     "applications": {
       "gecko": {
-        "id": "my-app-id@mozilla.org"
+        "id": "my-slack-workspaces@msramalho.github.io"
       }
     }
   }

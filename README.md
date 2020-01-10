@@ -7,7 +7,7 @@
     <strong>A simple browser extension to easily access multiple slack workspaces.</strong>
   </p>
   <p>
-    Available on <a href="">Chrome webstore</a> and <a href="">Firefox addons</a>
+    Available on <a href="https://chrome.google.com/webstore/detail/gbpffheebbifdigfogmodlfidmekacnd">Chrome webstore</a> and <a href="https://addons.mozilla.org/en-US/firefox/addon/my-slack-workspaces/">Firefox addons</a>
   </p>
 
   <img src="resources/print.png" height="300px;">
