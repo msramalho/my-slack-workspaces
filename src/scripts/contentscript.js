@@ -1,34 +1,19 @@
 import ext from "./utils/ext";
 
-var extractTags = () => {
-  var url = document.location.href;
-  if(!url || !url.match(/^http/)) return;
+// document.addEventListener('click', () => alert('Click occurred!'));
 
-  var data = {
-    title: "",
-    description: "",
-    url: document.location.href
-  }
-
-  var ogTitle = document.querySelector("meta[property='og:title']");
-  if(ogTitle) {
-    data.title = ogTitle.getAttribute("content")
-  } else {
-    data.title = document.title
-  }
-
-  var descriptionTag = document.querySelector("meta[property='og:description']") || document.querySelector("meta[name='description']")
-  if(descriptionTag) {
-    data.description = descriptionTag.getAttribute("content")
-  }
-
-  return data;
-}
-
-function onRequest(request, sender, sendResponse) {
-  if (request.action === 'process-page') {
-    sendResponse(extractTags())
-  }
+function onRequest(request, _sender, sendResponse) {
+    if (request.type === 'getWorkspaces') {
+        console.log(document.querySelectorAll("a.cta_lead"));
+        let workspaces = [...document.querySelectorAll("a.cta_lead")].map(el => {
+            return {
+                name: el.querySelector("span.link_head").textContent,
+                url: el.href,
+                image: el.querySelector("i.team_icon").style.backgroundImage.slice(4, -1).replace(/"/g, ""),
+            }
+        })
+        sendResponse(workspaces)
+    }
 }
 
 ext.runtime.onMessage.addListener(onRequest);

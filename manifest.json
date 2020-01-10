@@ -13,24 +13,24 @@
   "permissions": [
     "tabs",
     "storage",
-    "https://slack.com/your-workspaces"
+    "notifications",
+    "*://slack.com/your-workspaces*"
   ],
   "content_scripts": [
     {
       "matches": [
-        "https://slack.com/your-workspaces"
+        "*://slack.com/your-workspaces*"
       ],
       "js": [
         "scripts/contentscript.js"
       ],
-      "run_at": "document_end",
-      "all_frames": false
+      "run_at": "document_start"
     }
   ],
   "browser_action": {
     "default_icon": {
-      "19": "icons/icon-19.png",
-      "38": "icons/icon-38.png"
+      "32": "icons/icon-32.png",
+      "64": "icons/icon-64.png"
     },
     "default_title": "My Slack Environments",
     "default_popup": "popup.html"

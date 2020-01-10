@@ -1,65 +1,92 @@
 import ext from "./utils/ext";
 import storage from "./utils/storage";
+import draggable from "./utils/draggable";
 
-let instructionsItem = document.querySelector("#update-link")
 
-// var popup = document.getElementById("app");
-storage.get('workspaces', function(resp) {
-    let workspaces = resp.workspaces;
+//globals
+const WORKSPACES_PAGE = "https://slack.com/your-workspaces"
+
+// body of the popup that will hold displayable data
+let body = document.getElementById("display-container");
+
+// on load check storage for saved workspaces
+storage.get('workspaces', (res) => {
+    let workspaces = res.workspaces;
     if (!workspaces) {
         renderMessage("No workspaces found.");
+    } else {
+        renderWorkspaces(workspaces)
     }
+    addHrefListeners();
 });
 
-var template = (data) => {
-    var json = JSON.stringify(data);
-    return (`
-  <div class="site-description">
-    <h3 class="title">${data.title}</h3>
-    <p class="description">${data.description}</p>
-    <a href="${data.url}" target="_blank" class="url">${data.url}</a>
-  </div>
-  <div class="action-container">
-    <button data-bookmark='${json}' id="save-btn" class="btn btn-primary">Save</button>
-  </div>
-  `);
-}
-var renderMessage = (message) => {
-    var displayContainer = document.getElementById("display-container");
-    displayContainer.innerHTML = `<p class='message'>${message}</p>`;
-}
-var tab;
-var renderBookmark = (data) => {
-    var displayContainer = document.getElementById("display-container")
-    if (data) {
-        var tmpl = template(data);
-        displayContainer.innerHTML = tmpl;
-    } else {
-        console.log(tab);
-        renderMessage(JSON.stringify(tab.url))
-    }
+function renderWorkspaces(workspaces) {
+    let items = workspaces.map(ws => {
+        return `<li data-json="${btoa(JSON.stringify(ws))}"><div class="dragzone"><img src="icons/drag-48.png"/></div><a class="href" href="${ws.url}"><span><img class="workspaceIcon"src="${ws.image}"/></span> <span class="content" alt="${ws.name}">${ws.name}</span></span></li>`
+    }).join("")
+    body.innerHTML = `<ul id="workspaces">${items}</ul>`;
 }
 
+var renderMessage = (message) => {
+    body.innerHTML = `<p class='message'>${message}</p>`;
+}
+
+
+// display the update link if the page is the correct one
+let instructionsItem = document.querySelector("#update-link")
 ext.tabs.query({
     active: true,
     currentWindow: true
 }, function(tabs) {
     instructionsItem.style.display = "none";
-    let filtered = tabs.filter(t => t.url.includes("https://slack.com/your-workspaces"))
-    if (filtered.length){
-        instructionsItem.style.display = "list-item";
-        let tab = filtered[0];
-        chrome.tabs.sendMessage(tab.id, {
-            action: 'process-page'
-        }, renderBookmark);
-    }
+    if (tabs.filter(t => t.url.includes(WORKSPACES_PAGE)).length) instructionsItem.style.display = "list-item";
 });
 
 
-let workspaceLink = document.querySelector(".slack-workspaces");
-workspaceLink.addEventListener("click", function(e) {
-    e.preventDefault();
-    ext.tabs.create({
-        'url': "https://slack.com/your-workspaces"
+function addHrefListeners() {
+    document.querySelectorAll("a.href").forEach(el => {
+        el.addEventListener('click', (e) => {
+            chrome.tabs.create({
+                url: e.target.closest("a.href").href
+            });
+        }, false);
+    });
+    new draggable("#workspaces", readAndSaveWorkspaces);
+}
+
+function readAndSaveWorkspaces() {
+    let workspaces = [...document.querySelectorAll("#workspaces li")].map(el => JSON.parse(atob(el.getAttribute("data-json"))))
+    storage.set({
+        "workspaces": workspaces
+    })
+}
+
+
+let updateLink = document.querySelector(".update-workspaces");
+updateLink.addEventListener("click", function(e) {
+    ext.tabs.query({
+        active: true,
+        currentWindow: true
+    }, (tabs) => {
+        ext.tabs.sendMessage(tabs[0].id, {
+            type: "getWorkspaces"
+        }, (workspaces) => {
+            if (workspaces) {
+                storage.set({
+                    "workspaces": workspaces
+                })
+                ext.notifications.create({
+                    "type": "basic",
+                    "iconUrl": ext.extension.getURL("icons/icon-32.png"),
+                    "title": "Workspaces updated!",
+                    "message": `Found ${workspaces.length} workspace${workspaces.length!=1?"s":""}`
+                });
+                renderWorkspaces(workspaces);
+                addHrefListeners();
+                // window.close();
+            } else {
+                renderMessage("Unable to load workspaces, please retry")
+            }
+        });
     });
 })
