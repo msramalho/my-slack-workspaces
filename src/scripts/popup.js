@@ -20,6 +20,7 @@ storage.get('workspaces', (res) => {
     addHrefListeners();
 });
 
+// build html to display the workspaces
 function renderWorkspaces(workspaces) {
     let items = workspaces.map(ws => {
         return `<li data-json="${btoa(JSON.stringify(ws))}"><div class="dragzone"><img src="icons/drag-48.png"/></div><a class="href" href="${ws.url}"><span><img class="workspaceIcon"src="${ws.image}"/></span> <span class="content" alt="${ws.name}">${ws.name}</span></span></li>`
@@ -42,7 +43,7 @@ ext.tabs.query({
     if (tabs.filter(t => t.url.includes(WORKSPACES_PAGE)).length) instructionsItem.style.display = "list-item";
 });
 
-
+// add the listeners to the href
 function addHrefListeners() {
     document.querySelectorAll("a.href").forEach(el => {
         el.addEventListener('click', (e) => {
@@ -54,6 +55,7 @@ function addHrefListeners() {
     new draggable("#workspaces", readAndSaveWorkspaces);
 }
 
+// event handler for drop of reordering
 function readAndSaveWorkspaces() {
     let workspaces = [...document.querySelectorAll("#workspaces li")].map(el => JSON.parse(atob(el.getAttribute("data-json"))))
     storage.set({
@@ -61,7 +63,7 @@ function readAndSaveWorkspaces() {
     })
 }
 
-
+// handler for click on the special "update" button
 let updateLink = document.querySelector(".update-workspaces");
 updateLink.addEventListener("click", function(e) {
     ext.tabs.query({
@@ -83,7 +85,7 @@ updateLink.addEventListener("click", function(e) {
                 });
                 renderWorkspaces(workspaces);
                 addHrefListeners();
-                // window.close();
+                // window.close(); // if the popup should be closed
             } else {
                 renderMessage("Unable to load workspaces, please retry")
             }

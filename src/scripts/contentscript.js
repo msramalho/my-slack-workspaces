@@ -1,7 +1,5 @@
 import ext from "./utils/ext";
 
-// document.addEventListener('click', () => alert('Click occurred!'));
-
 function onRequest(request, _sender, sendResponse) {
     if (request.type === 'getWorkspaces') {
         console.log(document.querySelectorAll("a.cta_lead"));
