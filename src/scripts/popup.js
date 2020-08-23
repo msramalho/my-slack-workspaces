@@ -47,6 +47,7 @@ ext.tabs.query({
 function addHrefListeners() {
     document.querySelectorAll("a.href").forEach(el => {
         el.addEventListener('click', (e) => {
+            e.preventDefault();
             chrome.tabs.create({
                 url: e.target.closest("a.href").href
             });
