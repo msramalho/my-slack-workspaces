@@ -124,7 +124,6 @@ function js(done) {
 
 function zip() {
     // zip all files in the target folder for dist
-    console.log("ZIPPPING" + target);
     return pipe(`./build/${target}/**/*`, $.zip(`${target}.zip`), './dist')
 }
 
