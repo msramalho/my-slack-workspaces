@@ -20,17 +20,10 @@ storage.get('workspaces', (res) => {
     addHrefListeners();
 });
 
-// check if two dates are within 24 hours of each other (Date.now() returns milliseconds timestamp)
-function within24h(d1, d2) {
-    let seconds = Math.floor(Math.abs(d2 - d1) / 1000)
-    return seconds < (24 * 60 * 60)
-}
-
 // build html to display the workspaces
 function renderWorkspaces(workspaces) {
     let items = workspaces.map(ws => {
-        let url = within24h(Date.now(), ws.lastUpdated) ? ws.loginUrl : url;
-        return `<li data-json="${btoa(JSON.stringify(ws))}"><div class="dragzone"><img src="icons/drag-48.png"/></div><a class="href" href="${url}"><span><img class="workspaceIcon"src="${ws.image}"/></span> <span class="content" alt="${ws.name}">${ws.name}</span></span></li>`
+        return `<li data-json="${btoa(JSON.stringify(ws))}"><div class="dragzone"><img src="icons/drag-48.png"/></div><a class="href" href="${ws.url}"><span><img class="workspaceIcon"src="${ws.image}"/></span> <span class="content" alt="${ws.name}">${ws.name}</span></span></li>`
     }).join("")
     body.innerHTML = `<ul id="workspaces">${items}</ul>`;
 }
