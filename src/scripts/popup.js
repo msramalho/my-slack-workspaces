@@ -22,7 +22,7 @@ storage.get('workspaces', (res) => {
 // build html to display the workspaces
 function renderWorkspaces(workspaces) {
     let items = workspaces.map(ws => {
-        return `<li data-json="${btoa(JSON.stringify(ws))}"><div class="dragzone"><img src="icons/drag-48.png"/></div><a class="href" href="${ws.url}"><span><img class="workspaceIcon"src="${ws.image}"/></span> <span class="content" alt="${ws.name}">${ws.name}</span></span></li>`
+        return `<li data-json="${btoa(JSON.stringify(ws))}"><div class="dragzone"><img src="icons/drag-48.png"/></div><a class="href" href="${ws.url}"><span><img class="workspaceIcon"src="${ws.image}"/></span> <span class="content" alt="${ws.name}">${ws.name}</span></span></a><a class="removeWorkspace" removeName="${ws.name}" href="#"><span>x</span></a></li>`
     }).join("")
     body.innerHTML = `<ul id="workspaces">${items}</ul>`;
 }
@@ -53,6 +53,21 @@ function addHrefListeners() {
         }, false);
     });
     new draggable("#workspaces", readAndSaveWorkspaces);
+    document.querySelectorAll("a.removeWorkspace").forEach(el => {
+        el.addEventListener('click', (e) => {
+            e.preventDefault();
+
+            let removeName = e.target.closest("a.removeWorkspace").getAttribute("removeName")
+            storage.get('workspaces', (res) => {
+                let workspaces = res.workspaces;
+                if (!workspaces) return
+                storage.set({
+                    "workspaces": workspaces.filter(ws => ws.name != removeName)
+                })
+                e.target.closest("li").remove()
+            });
+        }, false);
+    });
 }
 
 // event handler for drop of reordering
@@ -69,8 +84,8 @@ function keepWorkspacesOrder(workspaces, callback) {
         // nothing was previously saved
         if (!prev) return callback(workspaces)
         // something had been saved before -> add new to top
-        let novel = workspaces.filter(ws => !prev.map(ws=>ws.name).includes(ws.name))
-        let old = prev.filter(ws => workspaces.map(ws=>ws.name).includes(ws.name)) // preserve order
+        let novel = workspaces.filter(ws => !prev.map(ws => ws.name).includes(ws.name))
+        let old = prev.filter(ws => workspaces.map(ws => ws.name).includes(ws.name)) // preserve order
         callback(novel.concat(old))
     });
 }
