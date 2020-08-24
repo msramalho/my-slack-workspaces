@@ -131,7 +131,7 @@ function zip() {
 function startWatching() {
     $.livereload.listen()
     watch(['./src/**/*']).on("change", () => {
-        exports.build();
+        exports.build()
         $.livereload.reload()
     });
 }
