@@ -1,7 +1,7 @@
 {
   "name": "My Slack Workspaces",
   "short_name": "My Slack Workspaces",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "manifest_version": 2,
   "description": "Easily access multiple slack workspaces from your browser.",
   "icons": {

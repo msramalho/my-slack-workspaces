@@ -73,7 +73,7 @@ function styles() {
             precision: 10,
             includePaths: ['.']
         }).on('error', $.sass.logError))
-        .pipe(dest(`build/${target}/styles`));
+        .pipe(dest(`build/${target}/styles`))
 }
 
 function mergeAll(done) {
@@ -85,7 +85,7 @@ function mergeAll(done) {
     done()
 }
 
-function js(done) {
+async function js(done) {
     const files = [
         'contentscript.js',
         'popup.js',
@@ -93,33 +93,36 @@ function js(done) {
     ]
 
     let tasks = files.map(file => {
-        return browserify({
-                entries: 'src/scripts/' + file,
-                debug: true
-            })
-            .transform('babelify', {
-                presets: ["@babel/preset-env"]
-            })
-            .transform(preprocessify, {
-                includeExtensions: ['.js'],
-                context: contextObject
-            })
-            .bundle()
-            .pipe(source(file))
-            .pipe(buffer())
-            .pipe(gulpif(!production, $.sourcemaps.init({
-                loadMaps: true
-            })))
-            .pipe(gulpif(!production, $.sourcemaps.write('./')))
-            .pipe(gulpif(production, $.uglify({
-                "mangle": false,
-                "output": {
-                    "ascii_only": true
-                }
-            })))
-            .pipe(gulp.dest(`build/${target}/scripts`));
+        return new Promise((resolve) => {
+            browserify({
+                    entries: 'src/scripts/' + file,
+                    debug: true
+                })
+                .transform('babelify', {
+                    presets: ["@babel/preset-env"]
+                })
+                .transform(preprocessify, {
+                    includeExtensions: ['.js'],
+                    context: contextObject
+                })
+                .bundle()
+                .pipe(source(file))
+                .pipe(buffer())
+                .pipe(gulpif(!production, $.sourcemaps.init({
+                    loadMaps: true
+                })))
+                .pipe(gulpif(!production, $.sourcemaps.write('./')))
+                .pipe(gulpif(production, $.uglify({
+                    "mangle": false,
+                    "output": {
+                        "ascii_only": true
+                    }
+                })))
+                .pipe(gulp.dest(`build/${target}/scripts`))
+                .on('end', resolve)
+        })
     });
-    done();
+    return Promise.all(tasks);
 }
 
 function zip() {
@@ -145,8 +148,7 @@ function pipe(src, ...transforms) {
 }
 
 // Export tasks
-exports.ext = parallel(manifest, js, mergeAll)
-exports.build = series(clean, styles, exports.ext)
+exports.build = series(clean, parallel(styles, manifest, js, mergeAll))
 exports.dist = series(exports.build, zip)
 exports.watch = startWatching
 exports.default = exports.build;

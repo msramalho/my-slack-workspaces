@@ -2,7 +2,6 @@ import ext from "./utils/ext";
 import storage from "./utils/storage";
 import draggable from "./utils/draggable";
 
-
 //globals
 const WORKSPACES_PAGE = "https://slack.com/your-workspaces"
 
@@ -64,6 +63,18 @@ function readAndSaveWorkspaces() {
     })
 }
 
+function keepWorkspacesOrder(workspaces, callback) {
+    storage.get('workspaces', (res) => {
+        let prev = res.workspaces;
+        // nothing was previously saved
+        if (!prev) return callback(workspaces)
+        // something had been saved before -> add new to top
+        let novel = workspaces.filter(ws => !prev.map(ws=>ws.name).includes(ws.name))
+        let old = prev.filter(ws => workspaces.map(ws=>ws.name).includes(ws.name)) // preserve order
+        callback(novel.concat(old))
+    });
+}
+
 // handler for click on the special "update" button
 let updateLink = document.querySelector(".update-workspaces");
 updateLink.addEventListener("click", function(e) {
@@ -75,18 +86,20 @@ updateLink.addEventListener("click", function(e) {
             type: "getWorkspaces"
         }, (workspaces) => {
             if (workspaces) {
-                storage.set({
-                    "workspaces": workspaces
+                keepWorkspacesOrder(workspaces, (finalWorkspaces) => {
+                    storage.set({
+                        "workspaces": finalWorkspaces
+                    })
+                    ext.notifications.create({
+                        "type": "basic",
+                        "iconUrl": ext.extension.getURL("icons/icon-32.png"),
+                        "title": "Workspaces updated!",
+                        "message": `Found ${finalWorkspaces.length} workspace${finalWorkspaces.length!=1?"s":""}`
+                    });
+                    renderWorkspaces(finalWorkspaces);
+                    addHrefListeners();
+                    // window.close(); // if the popup should be closed
                 })
-                ext.notifications.create({
-                    "type": "basic",
-                    "iconUrl": ext.extension.getURL("icons/icon-32.png"),
-                    "title": "Workspaces updated!",
-                    "message": `Found ${workspaces.length} workspace${workspaces.length!=1?"s":""}`
-                });
-                renderWorkspaces(workspaces);
-                addHrefListeners();
-                // window.close(); // if the popup should be closed
             } else {
                 renderMessage("Unable to load workspaces, please retry")
             }
