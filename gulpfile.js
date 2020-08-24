@@ -129,8 +129,10 @@ function zip() {
 
 // watch for any changes in the source folder
 function startWatching() {
+    $.livereload.listen()
     watch(['./src/**/*']).on("change", () => {
         exports.build();
+        $.livereload.reload()
     });
 }
 
