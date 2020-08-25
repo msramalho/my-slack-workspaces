@@ -33,7 +33,7 @@
 
 ##### Load the extension in Firefox
 1. Open Firefox browser and navigate to about:debugging
-2. Click "Load Temporary Add-on" and from the file browser, choose `my-slack-workspaces/build/firefox`
+2. Click "Load Temporary Add-on" and from the file browser, choose `my-slack-workspaces/build/firefox/manifest.json`
 
 
 ## Packaging
