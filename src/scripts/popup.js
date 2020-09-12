@@ -32,7 +32,7 @@ var renderMessage = (message) => {
 }
 
 
-// display the update link if the page is the correct one
+// display the "hidden" links if the page is the correct one
 let instructionsItem = document.querySelector("#update-link")
 ext.tabs.query({
     active: true,
@@ -56,7 +56,6 @@ function addHrefListeners() {
     document.querySelectorAll("a.removeWorkspace").forEach(el => {
         el.addEventListener('click', (e) => {
             e.preventDefault();
-
             let removeName = e.target.closest("a.removeWorkspace").getAttribute("removeName")
             storage.get('workspaces', (res) => {
                 let workspaces = res.workspaces;
@@ -136,18 +135,21 @@ loginAllLink.addEventListener("click", function(e) {
         }, (workspaces) => {
             if (workspaces) {
                 workspaces.forEach(ws => {
-                    chrome.tabs.create({
+                    let params = {
                         url: ws.loginUrl,
+                        active: false,
                         pinned: true
-                    }, tab => {
-                        function listener(tabId, changeInfo) {
-                            if (tabId === tab.id && changeInfo.status == 'complete') {
-                                chrome.tabs.remove(tab.id);
-                                chrome.tabs.onUpdated.removeListener(listener);
-                            }
-                        };
-                        chrome.tabs.onUpdated.addListener(listener);
-                    })
+                    }
+                    try {
+                        // if this is firefox "selected" is not available, but works
+                        openTabsAndClose({
+                            ...params,
+                            selected: false
+                        })
+                    } catch (_error) {
+                        // if this is chrome "selected" is required to work
+                        openTabsAndClose(params)
+                    }
                 })
             } else {
                 renderMessage("Unable to read workspaces, please retry")
@@ -155,3 +157,15 @@ loginAllLink.addEventListener("click", function(e) {
         });
     });
 })
+
+function openTabsAndClose(params) {
+    chrome.tabs.create(params, tab => {
+        function listener(tabId, changeInfo) {
+            if (tabId === tab.id && changeInfo.status == 'complete') {
+                chrome.tabs.remove(tab.id);
+                chrome.tabs.onUpdated.removeListener(listener);
+            }
+        };
+        chrome.tabs.onUpdated.addListener(listener);
+    })
+}
