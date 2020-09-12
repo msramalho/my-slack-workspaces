@@ -85,7 +85,7 @@ function keepWorkspacesOrder(workspaces, callback) {
         if (!prev) return callback(workspaces)
         // something had been saved before -> add new to top
         let novel = workspaces.filter(ws => !prev.map(ws => ws.name).includes(ws.name))
-        let old = prev.filter(ws => workspaces.map(ws => ws.name).includes(ws.name)) // preserve order
+        let old = prev.filter(ws => workspaces.map(ws => ws.name).includes(ws.name)).map(ws => workspaces.find(wsNovel => wsNovel.name == ws.name)) // preserve order but update the link entry
         callback(novel.concat(old))
     });
 }
@@ -117,6 +117,40 @@ updateLink.addEventListener("click", function(e) {
                 })
             } else {
                 renderMessage("Unable to load workspaces, please retry")
+            }
+        });
+    });
+})
+
+
+// handler for click on the special "login all" button
+let loginAllLink = document.querySelector(".login-all");
+loginAllLink.addEventListener("click", function(e) {
+    // fetches all the workspaces in the page, opens the loginUrl and waits to close them
+    ext.tabs.query({
+        active: true,
+        currentWindow: true
+    }, (tabs) => {
+        ext.tabs.sendMessage(tabs[0].id, {
+            type: "getWorkspaces"
+        }, (workspaces) => {
+            if (workspaces) {
+                workspaces.forEach(ws => {
+                    chrome.tabs.create({
+                        url: ws.loginUrl,
+                        pinned: true
+                    }, tab => {
+                        function listener(tabId, changeInfo) {
+                            if (tabId === tab.id && changeInfo.status == 'complete') {
+                                chrome.tabs.remove(tab.id);
+                                chrome.tabs.onUpdated.removeListener(listener);
+                            }
+                        };
+                        chrome.tabs.onUpdated.addListener(listener);
+                    })
+                })
+            } else {
+                renderMessage("Unable to read workspaces, please retry")
             }
         });
     });

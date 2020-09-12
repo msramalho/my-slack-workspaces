@@ -1,6 +1,6 @@
 {
     "name": "slackenv",
-    "version": "1.0.2",
+    "version": "1.0.4",
     "description": "Easily access multiple slack workspaces from your browser.",
     "scripts": {
         "chrome-build": "cross-env TARGET=chrome gulp",
