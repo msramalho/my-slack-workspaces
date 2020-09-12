@@ -24,6 +24,12 @@
 5. pull-request once ready
 
 
+### Releasing
+1. Update the version in [manifest.json](manifest.json) and [package.json](package.json)
+2. `npm run dist` to generate the zipped versions
+3. Go to [Firefox addons](https://addons.mozilla.org/en-US/developers/) and [Chrome webstore](https://chrome.google.com/webstore/devconsole/) and upload the new versions.
+
+
 
 ##### Load the extension in Chrome & Opera
 1. Open Chrome/Opera browser and navigate to chrome://extensions
