@@ -106,7 +106,7 @@ updateLink.addEventListener("click", function(e) {
                     })
                     ext.notifications.create({
                         "type": "basic",
-                        "iconUrl": ext.extension.getURL("icons/icon-32.png"),
+                        "iconUrl": ext.runtime.getURL("icons/icon-32.png"),
                         "title": "Workspaces updated!",
                         "message": `Found ${finalWorkspaces.length} workspace${finalWorkspaces.length!=1?"s":""}`
                     });

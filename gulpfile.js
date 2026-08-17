@@ -13,6 +13,7 @@ const browserify = require('browserify')
 const preprocessify = require('preprocessify')
 const buffer = require('vinyl-buffer')
 const source = require('vinyl-source-stream')
+const sass = require('gulp-sass')(require('sass'))
 
 const $ = require('gulp-load-plugins')()
 
@@ -30,13 +31,11 @@ let contextObject = Object.assign({}, generic, specific);
 let manifestInfo = {
     dev: {
         "background": {
-            "scripts": [
-                "scripts/livereload.js",
-            ]
+            "service_worker": "scripts/livereload.js"
         }
     },
     firefox: {
-        "applications": {
+        "browser_specific_settings": {
             "gecko": {
                 "id": "my-slack-workspaces@msramalho.github.io"
             }
@@ -55,11 +54,17 @@ function clean() {
 
 function manifest() {
     // append specific info to manifest and place it in the target folder
+    // livereload background is dev-only; gecko settings are firefox-only
+    let endObj = Object.assign(
+        {},
+        production ? {} : manifestInfo.dev,
+        target === "firefox" ? manifestInfo.firefox : {}
+    )
     return src('./manifest.json')
         .pipe($.mergeJson({
             fileName: "manifest.json",
             jsonSpace: " ".repeat(4),
-            endObj: target === "firefox" ? manifestInfo.firefox : manifestInfo.dev
+            endObj: endObj
         }))
         .pipe(gulp.dest(`./build/${target}`))
 }
@@ -68,11 +73,11 @@ function styles() {
     // convert scss to css in build folder
     return src('src/styles/**/*.scss')
         .pipe(plumber())
-        .pipe($.sass.sync({
+        .pipe(sass.sync({
             outputStyle: 'expanded',
             precision: 10,
             includePaths: ['.']
-        }).on('error', $.sass.logError))
+        }).on('error', sass.logError))
         .pipe(dest(`build/${target}/styles`))
 }
 
@@ -89,7 +94,8 @@ async function js(done) {
     const files = [
         'contentscript.js',
         'popup.js',
-        'livereload.js'
+        // livereload is dev-only, exclude from production bundles
+        ...(production ? [] : ['livereload.js'])
     ]
 
     let tasks = files.map(file => {
